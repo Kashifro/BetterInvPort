@@ -1,12 +1,6 @@
 #folders
-Amethyst/
 build/
-headers/
-.vscode/
 #script
 build.sh
 #test
-exp/
-#files
-blocktypehook.h
-Doc.txt
+nbt/

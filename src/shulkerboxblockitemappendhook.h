@@ -1,13 +1,37 @@
 #pragma once
-#include "itemstackbase.h"
+#include "item/itemstackbase.h"
+#include "shulkerenderer/colors.h"
 #include <string>
-#include <stdio.h>
+#include <cstdio>
 
 class ShulkerBoxBlockItem;
-class Level;
+
+static inline std::string extractShulkerColorName(const std::string &dbg)
+{
+    const std::string key = "mBlock = name: minecraft:";
+    auto pos = dbg.find(key);
+    if (pos == std::string::npos)
+        return "undyed";
+
+    pos += key.size();
+
+    auto end = dbg.find(',', pos);
+    if (end == std::string::npos)
+        end = dbg.size();
+
+    std::string full = dbg.substr(pos, end - pos);
+    const std::string suffix = "_shulker_box";
+    if (full.size() > suffix.size() &&
+        full.rfind(suffix) == full.size() - suffix.size()){
+        full = full.substr(0, full.size() - suffix.size());
+    }
+    if (full.empty())
+        full = "undyed";
+    return full;
+}
 
 using Shulker_appendHover_t =
-    void (*)(void *self, ItemStackBase *stack, void *level, std::string &out, bool flag);
+    void (*)(void *, ItemStackBase *, void *, std::string &, bool);
 
 Shulker_appendHover_t ShulkerBoxBlockItem_appendFormattedHovertext_orig = nullptr;
 
@@ -21,10 +45,17 @@ void ShulkerBoxBlockItem_appendFormattedHovertext_hook(
     if (ShulkerBoxBlockItem_appendFormattedHovertext_orig)
         ShulkerBoxBlockItem_appendFormattedHovertext_orig(self, stack, level, out, flag);
 
-    auto item = reinterpret_cast<ItemStackBase *>(stack);
-    if (item && item->mUserData)
-        out.append("\n§6Contains Items\n");
-    else
-        out.append("\n§7Empty Shulker Box\n");
+    if (!stack)
+        return;
 
+    std::string dbg = stack->toDebugString();
+    std::string colorName = extractShulkerColorName(dbg);
+    char colorCode = getShulkerColorCodeFromName(colorName);
+    bool hasNbt = (stack->mUserData != nullptr);
+    out.append("\n");
+    out.append(hasNbt ? "Contains items" : "Empty Shulker Box");
+    out.append("\n");
+    out.append("\xC2\xA7#");
+    out.push_back(colorCode);
+    out.append("\xC2\xA7v");
 }

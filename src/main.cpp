@@ -46,21 +46,4 @@ extern "C" [[gnu::visibility("default")]] void mod_init()
     HoverRenderer_renderHoverBox_orig =
         reinterpret_cast<RenderHoverBoxFn>(vtHR[17]);
     vtHR[17] = reinterpret_cast<void *>(&HoverRenderer_renderHoverBox_hook);
-
-    auto witemstr = hat::find_pattern(range1, hat::object_to_signature("10WeaponItem")).get();
-    auto witemtyp = hat::find_pattern(range2, hat::object_to_signature(witemstr)).get() - sizeof(void *);
-    auto witemvtb = hat::find_pattern(range2, hat::object_to_signature(witemtyp)).get() + sizeof(void *);
-    void **vtw = reinterpret_cast<void **>(witemvtb);
-    WeaponItem_appendFormattedHovertext_orig =
-        reinterpret_cast<Weapon_appendHover_t>(vtw[53]);
-    vtw[53] = reinterpret_cast<void *>(&WeaponItem_appendFormattedHovertext_hook);
-
-    // auto blocktypestr = hat::find_pattern(range1, hat::object_to_signature("9BlockType")).get();
-    // auto blocktypestyp = hat::find_pattern(range2, hat::object_to_signature(blocktypestr)).get() - sizeof(void *);
-    // auto blocktypevtb = hat::find_pattern(range2, hat::object_to_signature(blocktypestyp)).get() + sizeof(void *);
-    // void **vtblocktype = reinterpret_cast<void **>(blocktypevtb);
-    // BuildDescription_orig = 
-    //     reinterpret_cast<BuildDescription_t>(vtblocktype[113]);
-    // vtblocktype[113] = reinterpret_cast<void *>(&BuildDescription_hook);
-
 }
