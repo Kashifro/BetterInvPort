@@ -1,4 +1,4 @@
 #pragma once
 
-#include "shulkerboxblockitemappendhook.h"
-#include "renderhoverboxhook.h"
+#include "hooks/shulkerboxblockitemappendhook.h"
+#include "hooks/renderhoverboxhook.h"

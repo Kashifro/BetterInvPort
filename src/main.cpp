@@ -3,6 +3,7 @@
 #include <span>
 #include <string>
 #include "main.h"
+#include "util/keybinds.h"
 #include <libhat.hpp>
 
 extern "C" [[gnu::visibility("default")]] void mod_preinit() {}
@@ -26,6 +27,8 @@ extern "C" [[gnu::visibility("default")]] void mod_init()
     };
     dl_iterate_phdr([](dl_phdr_info *info, size_t, void *data)
                     { return (*static_cast<decltype(callback) *>(data))(*info); }, &callback);
+
+    SP_register_keybinds();
 
     // ShulkerBoxBlockItem
     auto ZTS19ShulkerBoxBlockItem = hat::find_pattern(range1, hat::object_to_signature("19ShulkerBoxBlockItem")).get();

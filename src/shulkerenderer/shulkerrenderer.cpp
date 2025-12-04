@@ -19,16 +19,17 @@ void ShulkerRenderer::render(
     if (!ctx)
         return;
 
-    const float slotSize = 18.0f;
-    const float thin = 1.0f;
+    const float frameScale = 0.60f;
+    const float slotSize = 17.5f;
+    const float thin = 0.5f;
     const float width = slotSize * 9.0f;
     const float height = slotSize * 3.0f;
 
     RectangleArea panel;
-    panel._x0 = x - 4.0f;
-    panel._x1 = x + width + 4.0f;
-    panel._y0 = y - 4.0f;
-    panel._y1 = y + height + 4.0f;
+    panel._x0 = x - 4.0f * frameScale;
+    panel._x1 = x + width + 4.0f * frameScale;
+    panel._y0 = y - 4.0f * frameScale;
+    panel._y1 = y + height + 4.0f * frameScale;
 
     mce::Color tint = getShulkerTint(colorCode);
 

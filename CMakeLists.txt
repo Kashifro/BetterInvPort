@@ -24,9 +24,7 @@ FetchContent_Declare(properties-parser
 FetchContent_MakeAvailable(libhat properties-parser)
 
 add_library(shulke SHARED
-    src/main.cpp src/ui/minecraftuirendercontext.cpp src/shulkerenderer/shulkerrenderer.cpp src/ui/fakenineslice.cpp
-    src/nbt/listtag.cpp
-    src/nbt/compoundtag.cpp
+    src/main.cpp src/ui/minecraftuirendercontext.cpp src/shulkerenderer/shulkerrenderer.cpp src/ui/fakenineslice.cpp src/util/keybinds.cpp
 )
 
 target_include_directories(shulke PUBLIC

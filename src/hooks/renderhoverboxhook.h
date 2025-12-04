@@ -3,6 +3,7 @@
 #include "ui/hoverrenderer.h"
 #include "shulkerenderer/shulkerrenderer.h"
 #include "shulkerenderer/colors.h"
+#include "util/keybinds.h"
 #include <string>
 
 using RenderHoverBoxFn =
@@ -63,8 +64,12 @@ void HoverRenderer_renderHoverBox_hook(
     ctx->fillRectangle(lef, accent, accent.a);
     ctx->fillRectangle(rig, accent, accent.a);
 
-    float px = x0;
+    float px = x0 + 3.0f;
     float py = y1 + 4.0f;
+
+    extern bool gSP_ToggleMode;
+    if (!gSP_ToggleMode) return;
+
 
     ShulkerRenderer::render(ctx, px, py, colorCode);
 }

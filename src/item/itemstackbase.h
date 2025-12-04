@@ -1,14 +1,13 @@
 #pragma once
 #include <cstdint>
 #include <string>
-#include "nbt/compoundtag.h"
+
+class CompoundTag;
 
 class ItemStackBase {
 public:
-    void*        mItem;       // 0x08 (WeakPtr<Item>, treated as opaque)
-    CompoundTag* mUserData;   // 0x10
-
-    // we don't need the rest of the fields for now; leave them opaque
+    void*        mItem;       
+    CompoundTag* mUserData; 
 
     ItemStackBase();
     ItemStackBase(const ItemStackBase&);

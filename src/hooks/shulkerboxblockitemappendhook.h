@@ -4,6 +4,8 @@
 #include <string>
 #include <cstdio>
 
+extern bool gSP_ToggleMode;
+
 class ShulkerBoxBlockItem;
 
 static inline std::string extractShulkerColorName(const std::string &dbg)
@@ -21,12 +23,16 @@ static inline std::string extractShulkerColorName(const std::string &dbg)
 
     std::string full = dbg.substr(pos, end - pos);
     const std::string suffix = "_shulker_box";
+
     if (full.size() > suffix.size() &&
-        full.rfind(suffix) == full.size() - suffix.size()){
-        full = full.substr(0, full.size() - suffix.size());
+        full.rfind(suffix) == full.size() - suffix.size())
+    {
+        full.resize(full.size() - suffix.size());
     }
+
     if (full.empty())
         full = "undyed";
+
     return full;
 }
 
@@ -47,13 +53,15 @@ void ShulkerBoxBlockItem_appendFormattedHovertext_hook(
 
     if (!stack)
         return;
-
     std::string dbg = stack->toDebugString();
     std::string colorName = extractShulkerColorName(dbg);
     char colorCode = getShulkerColorCodeFromName(colorName);
+
     bool hasNbt = (stack->mUserData != nullptr);
+
     out.append("\n");
     out.append(hasNbt ? "Contains items" : "Empty Shulker Box");
+    out.append("\n§7Press §eH§7 to toggle preview");
     out.append("\n");
     out.append("\xC2\xA7#");
     out.push_back(colorCode);
