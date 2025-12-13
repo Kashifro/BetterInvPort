@@ -32,7 +32,7 @@ FetchContent_MakeAvailable(safetyhook)
 FetchContent_MakeAvailable(zydis)
 
 add_library(shulke SHARED
-    src/main.cpp src/ui/minecraftuirendercontext.cpp src/shulkerenderer/shulkerrenderer.cpp src/ui/fakenineslice.cpp src/util/keybinds.cpp
+    src/main.cpp src/ui/minecraftuirendercontext.cpp src/shulkerenderer/shulkerrenderer.cpp src/ui/fakenineslice.cpp src/util/keybinds.cpp src/hooks/pstate.cpp
 )
 
 target_include_directories(shulke PUBLIC

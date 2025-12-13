@@ -9,7 +9,7 @@ inline void (*_gw_add_keyboard_callback)(
     void *user,
     bool (*callback)(void *, int, int));
 
-bool gSP_ToggleMode = false; 
+bool gSP_ToggleMode = false; //useless
 bool gSP_KeyDown = false;  
 
 void SP_register_keybinds(){
@@ -42,15 +42,8 @@ void SP_register_keybinds(){
         _gw_add_keyboard_callback( window, nullptr, [](void*, int key, int action) -> bool{
 
                 if (key == 72){ // H
-                    if (action == 0){
-                        gSP_KeyDown = true;
-                    }
-                    if (action == 2){
-                        if (gSP_KeyDown){
-                            gSP_ToggleMode = !gSP_ToggleMode; 
-                        }
-                        gSP_KeyDown = false;
-                    }
+                    if (action == 0) gSP_KeyDown = true;   // press
+                    if (action == 2) gSP_KeyDown = false;  // release
                 }
                 return false;
             }

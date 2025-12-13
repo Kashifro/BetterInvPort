@@ -5,10 +5,18 @@
 #include "main.h"
 #include <utility>
 #include <optional>
-#include "util/keybinds.h"
 #include <safetyhook.hpp>
 #include <libhat.hpp>
 #include <libhat/scanner.hpp>
+
+class ListTag;
+ItemStackBase_loadItem_t ItemStackBase_loadItem = nullptr;
+CompoundTag_getList_t CompoundTag_getList = nullptr;
+CompoundTag_contains_t CompoundTag_contains = nullptr;
+ListTag_get_t ListTag_get = nullptr;
+ListTag_size_t ListTag_size = nullptr;
+ItemStackBase_getName_t ItemStackBase_getName = nullptr;
+ItemStackBase_ctor_t ItemStackBase_ctor = nullptr;
 
 extern "C" [[gnu::visibility("default")]] void mod_preinit() {}
 extern "C" [[gnu::visibility("default")]] void mod_init()
@@ -40,9 +48,49 @@ extern "C" [[gnu::visibility("default")]] void mod_init()
     };
     SP_register_keybinds();
 
-    // auto functionaddr = scan(
-    // "funcsig"_sig
-    // );
+    // stoff
+    auto CtagGetListaddr = scan(
+    "53 48 83 EC 20 48 89 FB 64 48 8B 04 25 28 00 00 00 48 89 44 24 ?? 48 89 74 24 ?? 48 89 54 24 ?? 48 83 C7 08 48 8D 74 24 ?? E8 A2 D1 01 00 48 83"_sig
+    );
+    CompoundTag_getList =
+    reinterpret_cast<CompoundTag_getList_t>(CtagGetListaddr);
+
+    auto CtagContainsaddr = scan(
+    "53 48 83 EC 30 48 89 FB 64 48 8B 04 25 28 00 00 00 48 89 44 24 ?? 48 89 74 24 ?? 48 89 54 24 ?? 48 83 C7 08 48 8D 74 24 ?? E8 F2 ?? ?? ?? 48 83 C3 10 48 39 D8 74"_sig
+    );
+    CompoundTag_contains = 
+    reinterpret_cast<CompoundTag_contains_t>(CtagContainsaddr);
+
+    auto ListTagGetaddr = scan(
+    "31 C0 85 F6 78 ?? 48 8B 4F 08 48 8B 57 10 48 29 CA 48 C1 EA 03 39 F2 7E ?? 89 F0 48 8B 04 C1 C3"_sig
+    );
+    ListTag_get = 
+    reinterpret_cast<ListTag_get_t>(ListTagGetaddr);
+
+    auto ItemStackbaseloadItemaddr = scan(
+    "55 41 57 41 56 41 54 53 48 83 EC 70 48 89 F5 49 89 FE 64 48 8B 04 25 28 00 00 00 48 89 44 24 ?? 48 8D 7C 24 ?? E8 ?? ?? ?? ?? 48 8D 35 ?? ?? ?? ?? BA ?? ?? ?? ?? 48 89 EF E8 ?? ?? ?? ?? 41 89 C4"_sig
+    );
+    ItemStackBase_loadItem =
+    reinterpret_cast<ItemStackBase_loadItem_t>(ItemStackbaseloadItemaddr);
+
+    auto ListTagSizeaddr = scan(
+        "48 8B 47 10 48 2B 47 08 48 C1 E8 03"_sig
+    );
+    ListTag_size = 
+    reinterpret_cast<ListTag_size_t>(ListTagSizeaddr);
+
+    auto Isbgetnameaddr = scan(
+        "41 56 53 48 83 EC 48 48 89 F3 49 89 FE 64 48 8B 04 25 28 00 00 00 48 89 44 24 40 48 89 F7 E8 0D 10 00 00 84 C0 74 0F 48 8D 7C 24 08 48 89 DE E8"_sig
+    );
+    ItemStackBase_getName =
+    reinterpret_cast<ItemStackBase_getName_t>(Isbgetnameaddr);
+
+    auto Isbctor = scan(
+        "41 57 41 56 53 48 83 EC 30 48 89 FB 64 48 8B 04 25 28 00 00 00 48 89 44 24 28 48 8D 05 17 50 49"_sig
+    );
+    ItemStackBase_ctor =
+    reinterpret_cast<ItemStackBase_ctor_t>(Isbctor);
+
     // ShulkerBoxBlockItem
     auto ZTS19ShulkerBoxBlockItem = hat::find_pattern(range1, hat::object_to_signature("19ShulkerBoxBlockItem")).get();
     auto _ZTI19ShulkerBoxBlockItem = hat::find_pattern(range2, hat::object_to_signature(ZTS19ShulkerBoxBlockItem)).get() - sizeof(void *);
