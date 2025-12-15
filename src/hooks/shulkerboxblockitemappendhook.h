@@ -1,7 +1,7 @@
 #pragma once
 #include "item/itemstackbase.h"
 #include "shulkerenderer/colors.h"
-#include "nbt/nbt.h"
+#include "util/xhelper.h"
 #include <string>
 #include <cstddef>
 
@@ -71,7 +71,7 @@ inline void ShulkerBoxBlockItem_appendFormattedHovertext_hook(
     if (!list)
         return;
 
-    constexpr int MAX_PREVIEW = 10;
+    constexpr int MAX_PREVIEW = 27;
 
     int size   = ListTag_size(list);
     int shown  = 0;
@@ -86,7 +86,7 @@ inline void ShulkerBoxBlockItem_appendFormattedHovertext_hook(
             ++hidden;
             continue;
         }
-
+	
         alignas(16) std::byte buf[0x100]{};
         auto* loaded = reinterpret_cast<ItemStackBase*>(buf);
 
@@ -95,7 +95,7 @@ inline void ShulkerBoxBlockItem_appendFormattedHovertext_hook(
 
         std::string name;
         ItemStackBase_getName(&name, loaded);
-
+	
         uint8_t count =
             *reinterpret_cast<uint8_t*>(
                 reinterpret_cast<char*>(loaded) + 34);

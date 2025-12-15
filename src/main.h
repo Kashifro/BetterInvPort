@@ -2,4 +2,5 @@
 
 #include "hooks/shulkerboxblockitemappendhook.h"
 #include "hooks/renderhoverboxhook.h"
-#include "nbt/nbt.h"
+#include "hooks/itemappendhook.h"
+#include "util/xhelper.h"

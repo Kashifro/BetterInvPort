@@ -10,6 +10,7 @@
 #include <libhat/scanner.hpp>
 
 class ListTag;
+
 ItemStackBase_loadItem_t ItemStackBase_loadItem = nullptr;
 CompoundTag_getList_t CompoundTag_getList = nullptr;
 CompoundTag_contains_t CompoundTag_contains = nullptr;
@@ -17,6 +18,7 @@ ListTag_get_t ListTag_get = nullptr;
 ListTag_size_t ListTag_size = nullptr;
 ItemStackBase_getName_t ItemStackBase_getName = nullptr;
 ItemStackBase_ctor_t ItemStackBase_ctor = nullptr;
+ItemStackBase_getDamageValue_t ItemStackBase_getDamageValue = nullptr;
 
 extern "C" [[gnu::visibility("default")]] void mod_preinit() {}
 extern "C" [[gnu::visibility("default")]] void mod_init()
@@ -48,7 +50,7 @@ extern "C" [[gnu::visibility("default")]] void mod_init()
     };
     SP_register_keybinds();
 
-    // stoff
+    // stoff, add wildcards later this is for test 
     auto CtagGetListaddr = scan(
     "53 48 83 EC 20 48 89 FB 64 48 8B 04 25 28 00 00 00 48 89 44 24 ?? 48 89 74 24 ?? 48 89 54 24 ?? 48 83 C7 08 48 8D 74 24 ?? E8 A2 D1 01 00 48 83"_sig
     );
@@ -91,6 +93,12 @@ extern "C" [[gnu::visibility("default")]] void mod_init()
     ItemStackBase_ctor =
     reinterpret_cast<ItemStackBase_ctor_t>(Isbctor);
 
+    auto isbgetdmgaddr = scan(
+        "48 8B 47 08 48 85 C0 74 14 48 8B 00 48 85 C0 74 0C 48 8B 77 10 48 89 C7 E9 03 73 03 00 31 C0 C3"_sig
+    );
+    ItemStackBase_getDamageValue = 
+    reinterpret_cast<ItemStackBase_getDamageValue_t>(isbgetdmgaddr);
+
     // ShulkerBoxBlockItem
     auto ZTS19ShulkerBoxBlockItem = hat::find_pattern(range1, hat::object_to_signature("19ShulkerBoxBlockItem")).get();
     auto _ZTI19ShulkerBoxBlockItem = hat::find_pattern(range2, hat::object_to_signature(ZTS19ShulkerBoxBlockItem)).get() - sizeof(void *);
@@ -101,6 +109,16 @@ extern "C" [[gnu::visibility("default")]] void mod_init()
         reinterpret_cast<Shulker_appendHover_t>(vtshulk53[53]);
     vtshulk53[53] = reinterpret_cast<void *>(&ShulkerBoxBlockItem_appendFormattedHovertext_hook);
 
+    // WItem
+    auto ZTSWItem = hat::find_pattern(range1, hat::object_to_signature("10WeaponItem")).get();
+    auto ZTIWItem = hat::find_pattern(range2, hat::object_to_signature(ZTSWItem)).get() - sizeof(void *);
+    auto ZTVWItem = hat::find_pattern(range2, hat::object_to_signature(ZTIWItem)).get() + sizeof(void *);
+    void **vwitem = reinterpret_cast<void **>(ZTVWItem);
+
+    WItem_appendFormattedHovertext_orig =
+        reinterpret_cast<WItem_appendHover_t>(vwitem[53]);
+    vwitem[53] = reinterpret_cast<void *>(&WItem_appendFormattedHovertext_hook);
+
     // HovertextRenderer
     auto _ZTS17HoverTextRenderer = hat::find_pattern(range1, hat::object_to_signature("17HoverTextRenderer")).get();
     auto _ZTI17HoverTextRenderer = hat::find_pattern(range2, hat::object_to_signature(_ZTS17HoverTextRenderer)).get() - sizeof(void *);
@@ -110,4 +128,6 @@ extern "C" [[gnu::visibility("default")]] void mod_init()
     HoverRenderer_renderHoverBox_orig =
         reinterpret_cast<RenderHoverBoxFn>(vtHR[17]);
     vtHR[17] = reinterpret_cast<void *>(&HoverRenderer_renderHoverBox_hook);
+
+
 }

@@ -1,26 +1,8 @@
 #pragma once
 
-#include <string>
-#include <cstdint>
-
-class CompoundTag;
-class ItemStack;
-class ItemStackBase;
-class Level;
-
 class Item {
 public:
-    class Tier {};
-    class ScopedCreativeGroup {};
-    
-    static uintptr_t vtbl;  
-
-    short mMaxDamage;
-
-    Item(const std::string& identifier, short numId);
-
-    static void constructor(Item* self, const std::string& identifier, short numId);
-
+    //null entries are for index, i intend to fill this up
     virtual ~Item();
     virtual void vfunc1() = 0;
     virtual void vfunc2() = 0;
@@ -56,25 +38,5 @@ public:
     virtual void vfunc32() = 0;
     virtual void vfunc33() = 0;
     virtual void vfunc34() = 0;
-    virtual void vfunc35() = 0;
-    virtual short getMaxDamage() const; // index 36
-    virtual void vfunc37() = 0;
-    virtual void vfunc38() = 0;
-    virtual void vfunc39() = 0;
-    virtual void vfunc40() = 0;
-    virtual void vfunc41() = 0;
-    virtual void vfunc42() = 0;
-    virtual void vfunc43() = 0;
-    virtual void vfunc44() = 0;
-    virtual void vfunc45() = 0;
-    virtual void vfunc46() = 0;
-    virtual void vfunc47() = 0;
-    virtual void vfunc48() = 0;
-    virtual void vfunc49() = 0;
-    virtual void vfunc50() = 0;
-    virtual void vfunc51() = 0;
-    virtual void vfunc52() = 0;
-    virtual void appendFormattedHovertext(const ItemStackBase& stack, Level& level, std::string& outText, bool showCategory) const;
-    // virtual short getDamageValue(const CompoundTag* userData) const;
+    virtual short getMaxDamage() const; 
 };
-//prolly not using this :( i do realise i could've used offsets 
