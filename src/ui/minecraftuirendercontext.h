@@ -40,8 +40,23 @@ namespace ui {
     };
 }
 
-struct TextMeasureData;
-struct CaretMeasureData;
+#pragma pack(push, 4)
+struct TextMeasureData {
+    float fontSize;
+    float linePadding;
+    bool  renderShadow;
+    bool  showColorSymbol;
+    bool  hideHyphen;
+};
+#pragma pack(pop)
+
+#pragma pack(push, 4)
+struct CaretMeasureData {
+    int  position;
+    bool shouldRender;
+};
+#pragma pack(pop)
+
 struct ComponentRenderBatch;
 struct MinecraftUIMeasureStrategy;
 class Font;

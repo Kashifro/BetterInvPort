@@ -51,6 +51,10 @@ inline void HoverRenderer_renderHoverBox_hook(
     char hi = text[2];
     char lo = text[5];
     int index = (hex(hi) << 4) | hex(lo);
+    index &= (SHULKER_CACHE_SIZE - 1);
+
+    if (index < 0 || index >= SHULKER_CACHE_SIZE)
+        return;
 
     size_t colorPos = text.find("\xC2\xA7#", 0);
     if (colorPos == std::string::npos || colorPos + 3 >= text.size())

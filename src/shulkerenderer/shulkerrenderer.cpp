@@ -1,14 +1,4 @@
 #include "shulkerrenderer.h"
-#include "shulkerenderer/colors.h"
-
-bool ShulkerRenderer::sHasPanelTex = false;
-mce::TexturePtr ShulkerRenderer::sPanelTex{};
-uiutil::NineSlice ShulkerRenderer::sPanelSlice(256.0f, 256.0f, 4.0f, 4.0f);
-
-void ShulkerRenderer::setPanelTexture(mce::TexturePtr const& tex){
-    sPanelTex = tex;
-    sHasPanelTex = true;
-}
 
 void ShulkerRenderer::render(
     MinecraftUIRenderContext* ctx,
@@ -17,34 +7,19 @@ void ShulkerRenderer::render(
     int index,
     char colorCode
 ) {
-    if (!ctx)
+    if (!ctx || !ActiveUIContext || !ActiveUIFont)
         return;
 
-    //const
     constexpr int   COLS = 9;
     constexpr int   ROWS = 3;
     constexpr float SLOT = 18.0f;
     constexpr float DRAW = 17.5f;
-    constexpr float PAD  = 3.0f; 
+    constexpr float PAD  = 3.0f;
     constexpr float BEV  = 0.25f;
 
-    const float gridW = COLS * SLOT;
-    const float gridH = ROWS * SLOT;
-
-    //
     mce::Color tint = getShulkerTint(colorCode);
-
-    //colorpanel
-    mce::Color panelFill {
-        tint.r,
-        tint.g,
-        tint.b,
-        0.95f
-    };
-
-    //slotclrs
+    mce::Color panelFill { tint.r, tint.g, tint.b, 0.95f };
     mce::Color slotBorder = tint;
-
     mce::Color slotFill {
         tint.r * 0.30f,
         tint.g * 0.30f,
@@ -52,82 +27,107 @@ void ShulkerRenderer::render(
         1.0f
     };
 
-    mce::Color highlight { 1.0f, 1.0f, 1.0f, 0.15f };
-    mce::Color shadow    { 0.0f, 0.0f, 0.0f, 0.22f };
-
-    //panelbg
-    RectangleArea panel{};
-    panel._x0 = x;
-    panel._x1 = x + gridW + PAD * 2.0f;
-    panel._y0 = y;
-    panel._y1 = y + gridH + PAD * 2.0f;
-
+    RectangleArea panel {
+        x,
+        x + COLS * SLOT + PAD * 2.0f,
+        y,
+        y + ROWS * SLOT + PAD * 2.0f
+    };
     ctx->fillRectangle(panel, panelFill, panelFill.a);
 
-    //tophighlight
-    {
-        RectangleArea r{};
-        r._x0 = panel._x0;
-        r._x1 = panel._x1;
-        r._y0 = panel._y0;
-        r._y1 = panel._y0 + BEV;
-        ctx->fillRectangle(r, highlight, highlight.a);
-    }
-
-    //bottomshadow
-    {
-        RectangleArea r{};
-        r._x0 = panel._x0;
-        r._x1 = panel._x1;
-        r._y0 = panel._y1 - BEV;
-        r._y1 = panel._y1;
-        ctx->fillRectangle(r, shadow, shadow.a);
-    }
-
-    //slotgrid
     float sx0 = x + PAD;
     float sy0 = y + PAD;
 
+    Font& font = *ActiveUIFont;
+
+    TextMeasureData tmd{};
+    tmd.fontSize = 1.0f;
+    tmd.renderShadow = false;
+
+    CaretMeasureData cmd{};
+    cmd.position = 0;
+    cmd.shouldRender = false;
+
     for (int r = 0; r < ROWS; ++r) {
         for (int c = 0; c < COLS; ++c) {
+            int slotIndex = r * COLS + c;
+            ShulkerSlotCache& sc = gShulkerCache[index][slotIndex];
+
             float sx = sx0 + c * SLOT;
             float sy = sy0 + r * SLOT;
 
-            RectangleArea slot{};
-            slot._x0 = sx;
-            slot._x1 = sx + DRAW;
-            slot._y0 = sy;
-            slot._y1 = sy + DRAW;
-
+            RectangleArea slot { sx, sx + DRAW, sy, sy + DRAW };
             ctx->fillRectangle(slot, slotBorder, slotBorder.a);
 
-            RectangleArea inner{};
-            inner._x0 = slot._x0 + BEV;
-            inner._x1 = slot._x1 - BEV;
-            inner._y0 = slot._y0 + BEV;
-            inner._y1 = slot._y1 - BEV;
-
+            RectangleArea inner {
+                slot._x0 + BEV,
+                slot._x1 - BEV,
+                slot._y0 + BEV,
+                slot._y1 - BEV
+            };
             ctx->fillRectangle(inner, slotFill, slotFill.a);
 
-            //highlight
-            {
-                RectangleArea hl{};
-                hl._x0 = inner._x0;
-                hl._x1 = inner._x1;
-                hl._y0 = inner._y0;
-                hl._y1 = inner._y0 + BEV;
-                ctx->fillRectangle(hl, highlight, highlight.a);
-            }
+            if (!sc.valid || sc.count <= 1)
+                continue;
 
-            //shadow
-            {
-                RectangleArea sh{};
-                sh._x0 = inner._x0;
-                sh._x1 = inner._x1;
-                sh._y0 = inner._y1 - BEV;
-                sh._y1 = inner._y1;
-                ctx->fillRectangle(sh, shadow, shadow.a);
-            }
+            char buf[8];
+            snprintf(buf, sizeof(buf), "%u", sc.count);
+
+            //anchor BotRt
+            float anchorX = sx + DRAW - 0.5f;
+            float anchorY = sy + DRAW - 1.5f;
+
+            
+            float textW = ActiveUIContext->getLineLength(
+                font,
+                buf,
+                tmd.fontSize,
+                false
+            );
+
+            //heighttext
+            float textH = 6.0f;
+
+            RectangleArea shadow {
+                anchorX - textW + 1.0f,
+                anchorX + 1.0f,
+                anchorY - textH + 1.0f,
+                anchorY + 1.0f
+            };
+
+            RectangleArea text {
+                anchorX - textW,
+                anchorX,
+                anchorY - textH,
+                anchorY
+            };
+
+            // shadow
+            ActiveUIContext->drawText(
+                font,
+                shadow,
+                buf,
+                mce::Color{0, 0, 0, 0.75f},
+                1.0f,
+                ui::TextAlignment::Right,
+                tmd,
+                cmd
+            );
+
+            // text
+            ActiveUIContext->drawText(
+                font,
+                text,
+                buf,
+                mce::Color{1, 1, 1, 1},
+                1.0f,
+                ui::TextAlignment::Right,
+                tmd,
+                cmd
+            );
+
         }
     }
+
+    ctx->flushText(0.0f);
 }

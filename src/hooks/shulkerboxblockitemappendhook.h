@@ -21,8 +21,8 @@ inline void ShulkerBoxBlockItem_appendFormattedHovertext_hook(
     if (ShulkerBoxBlockItem_appendFormattedHovertext_orig)
         ShulkerBoxBlockItem_appendFormattedHovertext_orig(
             self, stack, level, out, flag);
-    size_t pos = out.find('\n');
-    if (pos != std::string::npos)
+
+    if (auto pos = out.find('\n'); pos != std::string::npos)
         out.erase(pos);
 
     if (!stack || !stack->mUserData)
@@ -31,14 +31,14 @@ inline void ShulkerBoxBlockItem_appendFormattedHovertext_hook(
     if (!CompoundTag_getList ||
         !ListTag_get ||
         !ListTag_size ||
-        !ItemStackBase_loadItem)
+        !ItemStackBase_loadItem ||
+        !CompoundTag_getByte)
         return;
 
-    static int sIndex = 0;
-    int index = sIndex++ % SHULKER_CACHE_SIZE;
+    int index = (reinterpret_cast<uintptr_t>(stack) >> 4) & (SHULKER_CACHE_SIZE - 1);
 
-    for (int i = 0; i < 27; ++i)
-        gShulkerCacheInit[index][i] = false;
+    for (int i = 0; i < SHULKER_SLOT_COUNT; ++i)
+        gShulkerCache[index][i].valid = false;
 
     void* list = CompoundTag_getList(stack->mUserData, "Items", 5);
     if (!list)
@@ -46,24 +46,28 @@ inline void ShulkerBoxBlockItem_appendFormattedHovertext_hook(
 
     int size = ListTag_size(list);
 
-    for (int i = 0; i < size && i < 27; ++i) {
+    for (int i = 0; i < size; ++i) {
         void* tag = ListTag_get(list, i);
         if (!tag)
             continue;
 
-        ItemStackBase* dst = asISB(gShulkerCache[index][i]);
-        ItemStackBase_loadItem(dst, tag);
-        gShulkerCacheInit[index][i] = true;
+        uint8_t slot  = CompoundTag_getByte(tag, "Slot", 4);
+        uint8_t count = CompoundTag_getByte(tag, "Count", 5);
+
+        if (slot >= SHULKER_SLOT_COUNT)
+            continue;
+
+        ShulkerSlotCache& sc = gShulkerCache[index][slot];
+        ItemStackBase_loadItem(asISB(sc.isb), tag);
+        sc.count = count;
+        sc.valid = true;
     }
 
-    static const char hexmap[] = "0123456789abcdef";
-    char hi = hexmap[(index >> 4) & 0xF];
-    char lo = hexmap[index & 0xF];
-
+    static const char hex[] = "0123456789abcdef";
     out.insert(0, "\xC2\xA7");
-    out.insert(2, 1, hi);
+    out.insert(2, 1, hex[(index >> 4) & 0xF]);
     out.insert(3, "\xC2\xA7");
-    out.insert(5, 1, lo);
+    out.insert(5, 1, hex[index & 0xF]);
 
     if (!ItemStackBase_getItem || !Item_getId)
         return;

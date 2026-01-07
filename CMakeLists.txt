@@ -43,7 +43,6 @@ add_library(shulke SHARED
     src/main.cpp
     src/ui/minecraftuirendercontext.cpp
     src/shulkerenderer/shulkerrenderer.cpp
-    src/ui/fakenineslice.cpp
     src/util/keybinds.cpp
     src/util/scache.cpp
 )
